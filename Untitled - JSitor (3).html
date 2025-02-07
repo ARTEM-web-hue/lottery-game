@@ -1,0 +1,288 @@
+<!doctype html><html><head><style type="text/css">body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f9;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.container {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    max-width: 400px;
+    width: 100%;
+}
+
+h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+label {
+    display: block;
+    margin: 10px 0 5px;
+    font-weight: bold;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+button {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+#lottery-number {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+}
+
+h2 {
+    font-size: 20px;
+    margin-top: 30px;
+    color: #333;
+}
+
+table {
+    width: 100%;
+    margin-top: 10px;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 10px;
+    border: 1px solid #ccc;
+}
+
+th {
+    background-color: #007bff;
+    color: #fff;
+}
+
+tbody tr:nth-child(odd) {
+    background-color: #f9f9f9;
+}
+
+a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}</style></head><body><!DOCTYPE html>
+<html lang="ru">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Лотерейная игра</title>
+	<link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+	<div id="login-container" class="container">
+		<h1>Войдите в аккаунт</h1>
+		<form id="login-form">
+			<label for="username">Логин:</label>
+			<input type="text" id="username" placeholder="Введите логин" required>
+			<label for="password">Пароль:</label>
+			<input type="password" id="password" placeholder="Введите пароль" required>
+			<button type="submit">Войти</button>
+		</form>
+		<p>Нет аккаунта? <a href="#" id="register-link">Зарегистрируйтесь</a></p>
+	</div>
+
+	<div id="game-container" class="container" style="display: none;">
+		<h1>Лотерейная игра</h1>
+		<p>Введите ваш возраст и вес, чтобы узнать лотерейное число!</p>
+		<label for="age">Возраст:</label>
+		<input type="number" id="age" placeholder="Введите возраст" required>
+		<label for="weight">Вес:</label>
+		<input type="number" id="weight" placeholder="Введите вес" required>
+		<button id="calculate-button">Рассчитать</button>
+		<p>Ваше лотерейное число: <span id="lottery-number">—</span></p>
+
+		<h2>Таблица лотерейных билетов</h2>
+		<table id="lottery-table">
+			<thead>
+				<tr>
+					<th>Логин</th>
+					<th>Лотерейное число</th>
+				</tr>
+			</thead>
+			<tbody>
+				<!-- Строки таблицы будут добавлены через JavaScript -->
+			</tbody>
+		</table>
+	</div>
+
+	<script src="script.js"></script>
+</body>
+
+</html><script type="text/javascript">let lotteryHistory = []; // История лотерейных чисел
+const lotteryHistorySize = 10; // Максимальное количество записей в таблице
+
+// Получаем элементы DOM
+const loginContainer = document.getElementById('login-container');
+const gameContainer = document.getElementById('game-container');
+const loginForm = document.getElementById('login-form');
+const registerLink = document.getElementById('register-link');
+const calculateButton = document.getElementById('calculate-button');
+const ageInput = document.getElementById('age');
+const weightInput = document.getElementById('weight');
+const lotteryNumberDisplay = document.getElementById('lottery-number');
+const lotteryTableBody = document.querySelector('#lottery-table tbody');
+
+// Загружаем историю лотерейных чисел из localStorage
+function loadLotteryHistory() {
+  const savedHistory = localStorage.getItem('lotteryHistory');
+  if (savedHistory) {
+    lotteryHistory = JSON.parse(savedHistory);
+    updateLotteryTable();
+  }
+}
+
+// Сохраняем историю лотерейных чисел в localStorage
+function saveLotteryHistory() {
+  localStorage.setItem('lotteryHistory', JSON.stringify(lotteryHistory));
+}
+
+// Обновляем таблицу лотерейных билетов
+function updateLotteryTable() {
+  lotteryTableBody.innerHTML = ''; // Очищаем таблицу
+  lotteryHistory.forEach((entry) => {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+            <td>${entry.username}</td>
+            <td>${entry.lotteryNumber}</td>
+        `;
+    lotteryTableBody.appendChild(row);
+  });
+}
+
+// Добавляем запись в историю лотерейных чисел
+function addToLotteryHistory(username, lotteryNumber) {
+  lotteryHistory.push({ username, lotteryNumber });
+  // Ограничиваем историю 10 записями
+  if (lotteryHistory.length > lotteryHistorySize) {
+    lotteryHistory = lotteryHistory.slice(-lotteryHistorySize);
+  }
+  saveLotteryHistory();
+  updateLotteryTable();
+}
+
+// Рассчитываем лотерейное число
+function calculateLotteryNumber(age, weight) {
+  let result = (age * weight) / 4; // Перемножаем и делим на 4
+  if (result < 81) {
+    result += 81; // Добавляем 81, если число меньше 81
+  } else {
+    result += 18; // Добавляем 18, если число больше или равно 81
+  }
+  result = result - weight + age; // Вычитаем вес и прибавляем возраст
+  return Math.round(result); // Округляем результат
+}
+
+// Проверяем, есть ли аккаунт в localStorage
+function checkAccount() {
+  return localStorage.getItem('account') !== null;
+}
+
+// Создаем аккаунт
+function createAccount(username, password) {
+  const account = { username, password };
+  localStorage.setItem('account', JSON.stringify(account));
+}
+
+// Проверяем логин и пароль
+function login(username, password) {
+  const account = JSON.parse(localStorage.getItem('account'));
+  return account && account.username === username && account.password === password;
+}
+
+// Обработчик для формы входа
+loginForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const username = document.getElementById('username').value;
+  const password = document.getElementById('password').value;
+
+  if (checkAccount()) {
+    if (login(username, password)) {
+      loginContainer.style.display = 'none';
+      gameContainer.style.display = 'block';
+    } else {
+      alert('Неверный логин или пароль!');
+    }
+  } else {
+    createAccount(username, password);
+    loginContainer.style.display = 'none';
+    gameContainer.style.display = 'block';
+  }
+});
+
+// Обработчик для ссылки регистрации
+registerLink.addEventListener('click', (e) => {
+  e.preventDefault();
+  const username = document.getElementById('username').value;
+  const password = document.getElementById('password').value;
+
+  if (!username || !password) {
+    alert('Пожалуйста, введите логин и пароль!');
+    return;
+  }
+
+  if (checkAccount()) {
+    alert('Аккаунт уже существует! Войдите в систему.');
+  } else {
+    createAccount(username, password);
+    loginContainer.style.display = 'none';
+    gameContainer.style.display = 'block';
+  }
+});
+
+// Обработчик для кнопки "Рассчитать"
+calculateButton.addEventListener('click', () => {
+  const age = parseInt(ageInput.value);
+  const weight = parseInt(weightInput.value);
+
+  if (isNaN(age) || isNaN(weight)) {
+    alert('Пожалуйста, введите корректные значения для возраста и веса.');
+    return;
+  }
+
+  const lotteryNumber = calculateLotteryNumber(age, weight);
+  lotteryNumberDisplay.textContent = lotteryNumber;
+
+  const account = JSON.parse(localStorage.getItem('account'));
+  if (account) {
+    addToLotteryHistory(account.username, lotteryNumber);
+  }
+});
+
+// Загружаем историю лотерейных чисел при загрузке страницы
+loadLotteryHistory();</script></body><html>
